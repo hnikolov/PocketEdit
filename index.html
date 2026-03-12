@@ -9884,6 +9884,7 @@
                 this.isBruteForcing = false;
                 this.isWaitingForPresetDump = false;
                 this.dumpPackets = [];
+                this.syncDelayMs = 1; // Delay between sync commands to avoid overwhelming device
                 this.ackPromiseResolve = null;
                 this.isSyncingState = false;
                 this.syncTimeoutId = null;
@@ -13022,7 +13023,7 @@
                         if (command) {
                             await this.writeCommand(command);
                             syncedCount++;
-                            await new Promise(resolve => setTimeout(resolve, 50));
+                            await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
                             this.log(`[SYNC] Preset volume: ${value}`, 'received');
                         } else {
                             this.log(`⚠ No command for preset volume = ${value}`, 'warning');
@@ -13040,7 +13041,7 @@
                             const commandModuleId = (moduleId === 9) ? 3 : moduleId;
                             await this.sendModuleState(commandModuleId, isEnabled);
                             syncedCount++;
-                            await new Promise(resolve => setTimeout(resolve, 50));
+                            await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
                             this.log(`[SYNC] Module ${moduleId} (${moduleName}) state: ${isEnabled}`, 'received');
                         }
                     }
@@ -13053,7 +13054,7 @@
                         if (ampModeCommand) {
                             await this.writeCommand(ampModeCommand);
                             syncedCount++;
-                            await new Promise(resolve => setTimeout(resolve, 50));
+                            await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
                             this.log(`[SYNC] Amp mode: ${fullPresetData.ampMode}`, 'received');
                         }
                     }
@@ -13073,7 +13074,7 @@
                             if (command) {
                                 await this.writeCommand(command);
                                 syncedCount++;
-                                await new Promise(resolve => setTimeout(resolve, 50));
+                                await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
                                 this.log(`[SYNC] Module ${lookupModuleId} effect: ${fxId}`, 'received');
                             } else {
                                 this.log(`⚠ No command for module ${lookupModuleId} effect ${fxId}`, 'warning');
@@ -13085,7 +13086,7 @@
                     if (fullPresetData.order && fullPresetData.order.length > 0) {
                         this.updateChainOrder();
                         syncedCount++;
-                        await new Promise(resolve => setTimeout(resolve, 50));
+                        await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
                         this.log(`[SYNC] Signal chain order: ${fullPresetData.order.join(' → ')}`, 'received');
                     }
 
@@ -13157,7 +13158,7 @@
                             syncedCount++;
 
                             // Wait 50ms between parameter sends to avoid overwhelming device
-                            await new Promise(resolve => setTimeout(resolve, 50)); // Was tested with 10ms - OK
+                            await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
 
                             this.log(`Synced M${moduleId}.A${algId}: ${value} (${syncedCount}/${totalParams})`, 'received');
                         }
