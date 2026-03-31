@@ -12909,10 +12909,18 @@
 
                         fullPresetData.parameters[moduleId] = {};
 
+                        // Build case-insensitive lookup for JSON parameter keys
+                        const paramLookup = {};
+                        if (moduleData.parameters) {
+                            for (const key of Object.keys(moduleData.parameters)) {
+                                paramLookup[key.toUpperCase()] = moduleData.parameters[key];
+                            }
+                        }
+
                         for (const param of effectDef.alg) {
                             const paramName = param.name;
                             const algId = param.algId;
-                            const paramValue = moduleData.parameters[paramName];
+                            const paramValue = paramLookup[paramName.toUpperCase()];
 
                             if (paramValue === undefined) {
                                 // Use default value if not specified
