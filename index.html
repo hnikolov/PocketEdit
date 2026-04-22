@@ -14867,11 +14867,12 @@
         }
 
         document.addEventListener('mouseover', (e) => {
-            const validTarget = e.target.closest('.slider, .dropdown-select, .toggle-switch');
+            const validTarget = e.target.closest('.slider, .dropdown-select, .toggle-switch, .chain-module');
             if (validTarget && !validTarget.disabled && !validTarget.classList.contains('locked')) {
                 currentlyHoveredControl = validTarget;
                 const row = validTarget.closest('.control-row');
                 if (row) row.classList.add('hover-focus');
+                else if (validTarget.classList.contains('chain-module')) validTarget.classList.add('hover-focus');
             }
         });
 
@@ -14881,6 +14882,7 @@
                 if (!currentlyHoveredControl.contains(relatedTarget)) {
                     const row = currentlyHoveredControl.closest('.control-row');
                     if (row) row.classList.remove('hover-focus');
+                    else if (currentlyHoveredControl.classList.contains('chain-module')) currentlyHoveredControl.classList.remove('hover-focus');
                     currentlyHoveredControl = null;
                 }
             }
@@ -14930,14 +14932,18 @@
                     triggerControlUpdate(select);
                 }
             }
-            else if (currentlyHoveredControl.classList.contains('toggle-switch')) {
-                const toggle = currentlyHoveredControl;
-                // Prevent rapid flipping by recording last flip timestamp
-                const now = Date.now();
-                const lastFlip = parseInt(toggle.dataset.lastWheelFlip || "0");
-                if (now - lastFlip > 200) { 
-                     toggle.click(); 
-                     toggle.dataset.lastWheelFlip = now;
+            else if (currentlyHoveredControl.classList.contains('toggle-switch') || currentlyHoveredControl.classList.contains('chain-module')) {
+                const toggle = currentlyHoveredControl.classList.contains('chain-module') ? 
+                    currentlyHoveredControl.querySelector('.module-status') : currentlyHoveredControl;
+                
+                if (toggle) {
+                    // Prevent rapid flipping by recording last flip timestamp
+                    const now = Date.now();
+                    const lastFlip = parseInt(toggle.dataset.lastWheelFlip || "0");
+                    if (now - lastFlip > 200) { 
+                         toggle.click(); 
+                         toggle.dataset.lastWheelFlip = now;
+                    }
                 }
             }
         }, { passive: false }); 
@@ -14988,14 +14994,17 @@
                         triggerControlUpdate(select);
                      }
                 } 
-                else if (currentlyHoveredControl.classList.contains('toggle-switch')) {
+                else if (currentlyHoveredControl.classList.contains('toggle-switch') || currentlyHoveredControl.classList.contains('chain-module')) {
                     // Direction doesn't matter for toggles on key press, just flip it
-                    const toggle = currentlyHoveredControl;
-                    const now = Date.now();
-                    const lastFlip = parseInt(toggle.dataset.lastKeyFlip || "0");
-                    if (now - lastFlip > 200) { 
-                         toggle.click(); 
-                         toggle.dataset.lastKeyFlip = now;
+                    const toggle = currentlyHoveredControl.classList.contains('chain-module') ? 
+                        currentlyHoveredControl.querySelector('.module-status') : currentlyHoveredControl;
+                    if (toggle) {
+                        const now = Date.now();
+                        const lastFlip = parseInt(toggle.dataset.lastKeyFlip || "0");
+                        if (now - lastFlip > 200) { 
+                             toggle.click(); 
+                             toggle.dataset.lastKeyFlip = now;
+                        }
                     }
                 }
             }
@@ -15049,8 +15058,10 @@
                         triggerControlUpdate(select);
                     }
                 } 
-                else if (currentlyHoveredControl.classList.contains('toggle-switch')) {
-                    currentlyHoveredControl.click();
+                else if (currentlyHoveredControl.classList.contains('toggle-switch') || currentlyHoveredControl.classList.contains('chain-module')) {
+                    const toggle = currentlyHoveredControl.classList.contains('chain-module') ? 
+                        currentlyHoveredControl.querySelector('.module-status') : currentlyHoveredControl;
+                    if (toggle) toggle.click();
                 }
             }
         });
